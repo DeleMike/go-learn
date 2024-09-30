@@ -15,7 +15,11 @@ func main() {
 	// testStruct()
 	rectangle := Rect{width: 4, height: 5}
 	area := fmt.Sprintf("The area of the rectangele is %.1f", (rectangle.area()))
+	perimeter := fmt.Sprintf("The perimeter of the rectangele is %.1f", (rectangle.perimeter()))
+
 	fmt.Println(area)
+	fmt.Println(perimeter)
+
 }
 
 func playWithFormatting() {
@@ -87,4 +91,13 @@ type Rect struct {
 
 func (r Rect) area() float64{
 	return r.width * r.height
+}
+
+func(r Rect) perimeter() float64 {
+	return 2 * (r.height + r.width)
+}
+
+type shape interface {
+	area() float64
+	perimeter() float64
 }
