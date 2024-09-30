@@ -12,7 +12,10 @@ func main() {
 	// playWithFormatting()
 	// ifConditionals()
 	// fmt.Println(getCoo())
-	testStruct()
+	// testStruct()
+	rectangle := Rect{width: 4, height: 5}
+	area := fmt.Sprintf("The area of the rectangele is %.1f", (rectangle.area()))
+	fmt.Println(area)
 }
 
 func playWithFormatting() {
@@ -74,4 +77,14 @@ func testStruct() {
 
 	fmt.Println("User is ", user)
 
+}
+
+type Rect struct {
+	width float64
+	height float64
+
+}
+
+func (r Rect) area() float64{
+	return r.width * r.height
 }
