@@ -21,15 +21,38 @@ func main() {
 	// fmt.Println(area)
 	// fmt.Println(perimeter)
 
-	empType1 := fulltime{name: "Akindele@Google", salary: 100000}
-	empType2 := contractor{name: "Akindele@AIResearchUni", hourlyPay: 500, hoursPerYear: 1000}
-	empType3 := contractor{name: "Akindele@GHCommunity", hourlyPay: 300, hoursPerYear: 500}
+	// empType1 := fulltime{name: "Akindele@Google", salary: 100000}
+	// empType2 := contractor{name: "Akindele@AIResearchUni", hourlyPay: 500, hoursPerYear: 1000}
+	// empType3 := contractor{name: "Akindele@GHCommunity", hourlyPay: 300, hoursPerYear: 500}
 
-	fmt.Printf("%s is earning %.2f\n", (empType1.name), float64(empType1.getSalary()))
-	fmt.Printf("%s is earning %.2f\n", (empType2.name), float64(empType2.getSalary()))
-	fmt.Printf("%s is earning %.2f\n", (empType3.name), float64(empType3.getSalary()))
+	// fmt.Printf("%s is earning %.2f\n", (empType1.name), float64(empType1.getSalary()))
+	// fmt.Printf("%s is earning %.2f\n", (empType2.name), float64(empType2.getSalary()))
+	// fmt.Printf("%s is earning %.2f\n", (empType3.name), float64(empType3.getSalary()))
+	
+	// var i interface{} = "Hello, there!"
+	// emp, ok := i.(string)
+
+	// if ok {
+	// 	fmt.Println("I am an employee and my name is: ", emp)
+	// } else {
+	// 	fmt.Println("This is a lie.")
+	// }
+
+	// printNumericValue("empType1")
+
+}
 
 
+
+func printNumericValue(num interface{}) {
+	switch v:= num.(type) {
+	case int:
+		fmt.Printf("%T\n", v)
+	case float64:
+		fmt.Printf("%T\n", v)
+	default:
+		fmt.Printf("%T\n",v)
+	}
 }
 
 func playWithFormatting() {
