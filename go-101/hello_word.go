@@ -13,12 +13,22 @@ func main() {
 	// ifConditionals()
 	// fmt.Println(getCoo())
 	// testStruct()
-	rectangle := Rect{width: 4, height: 5}
-	area := fmt.Sprintf("The area of the rectangele is %.1f", (rectangle.area()))
-	perimeter := fmt.Sprintf("The perimeter of the rectangele is %.1f", (rectangle.perimeter()))
 
-	fmt.Println(area)
-	fmt.Println(perimeter)
+	// rectangle := Rect{width: 4, height: 5}
+	// area := fmt.Sprintf("The area of the rectangele is %.1f", (rectangle.area()))
+	// perimeter := fmt.Sprintf("The perimeter of the rectangele is %.1f", (rectangle.perimeter()))
+
+	// fmt.Println(area)
+	// fmt.Println(perimeter)
+
+	empType1 := fulltime{name: "Akindele@Google", salary: 100000}
+	empType2 := contractor{name: "Akindele@AIResearchUni", hourlyPay: 500, hoursPerYear: 1000}
+	empType3 := contractor{name: "Akindele@GHCommunity", hourlyPay: 300, hoursPerYear: 500}
+
+	fmt.Printf("%s is earning %.2f\n", (empType1.name), float64(empType1.getSalary()))
+	fmt.Printf("%s is earning %.2f\n", (empType2.name), float64(empType2.getSalary()))
+	fmt.Printf("%s is earning %.2f\n", (empType3.name), float64(empType3.getSalary()))
+
 
 }
 
@@ -84,20 +94,51 @@ func testStruct() {
 }
 
 type Rect struct {
-	width float64
+	width  float64
 	height float64
-
 }
 
-func (r Rect) area() float64{
+func (r Rect) area() float64 {
 	return r.width * r.height
 }
 
-func(r Rect) perimeter() float64 {
+func (r Rect) perimeter() float64 {
 	return 2 * (r.height + r.width)
 }
 
 type shape interface {
 	area() float64
 	perimeter() float64
+}
+
+type employee interface {
+	getName() string
+	getSalary() int
+}
+
+type contractor struct {
+	name         string
+	hourlyPay    int
+	hoursPerYear int
+}
+
+func (c contractor) getName() string {
+	return c.name
+}
+
+func (c contractor) getSalary() int {
+	return c.hourlyPay * c.hoursPerYear
+}
+
+type fulltime struct {
+	name   string
+	salary int
+}
+
+func (ft fulltime) getSalary() int {
+	return ft.salary
+}
+
+func (ft fulltime) getName() string {
+	return ft.name
 }
