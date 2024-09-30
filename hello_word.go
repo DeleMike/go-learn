@@ -11,11 +11,12 @@ func main() {
 
 	// playWithFormatting()
 	// ifConditionals()
-	fmt.Println(getCoo())
+	// fmt.Println(getCoo())
+	testStruct()
 }
 
 func playWithFormatting() {
-	
+
 	const name = "Andrew ng"
 	const openRate = 30.5
 
@@ -31,7 +32,7 @@ func ifConditionals() {
 
 	if messageLen <= maxMessageLen {
 		fmt.Println("Message sent")
-	}else{
+	} else {
 		fmt.Println("Message not sent")
 	}
 
@@ -40,7 +41,37 @@ func ifConditionals() {
 	}
 }
 
-func getCoo() (x,y int)  {
-	x, y = 2,3
+func getCoo() (x, y int) {
+	x, y = 2, 3
 	return
+}
+
+func testStruct() {
+	type Car struct {
+		Make  string
+		Model string
+		age   float64
+		price float64
+		Wheel struct {
+			Radius   float64
+			Material string
+		}
+	}
+
+	car := Car{Make: "Mercedes-Benz", Model: "gx-500", age: 0.2, price: 350000}
+	car.Wheel.Material = "Black Puma"
+	car.Wheel.Radius = 30.5
+	fmt.Println("Car is ", car)
+
+	// anonymous structs
+	user := struct {
+		name string
+		age  int
+	}{
+		name: "Ada Lovelace",
+		age:  70,
+	}
+
+	fmt.Println("User is ", user)
+
 }
