@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	// accountAge := 2.6
@@ -40,9 +42,45 @@ func main() {
 
 	// printNumericValue("empType1")
 
+	// i, err := strconv.Atoi("44n")
+	// if err != nil {
+	// 	error1 := errors.New("You cannot do this nau!")
+	// 	fmt.Println(error1)
+	// }else {
+	// 	fmt.Println(i)
+	// }
+
+	// count:= 0
+	// for count <= 5 {
+	// 	fmt.Println(count)
+	// 	count++
+	// }
+
+	fizzBuzz(15)
 }
 
+func fizzBuzz(n int) {
+	for i:= 1; i<=n; i++ {
+		if i%3 == 0 && i%5 == 0 {
+			fmt.Println("FizzBuzz")
+		} else if i%3 == 0 {
+			fmt.Println("Fizz")
+		} else if i%5 == 0 {
+			fmt.Println("Buzz")
+		} else{
+			fmt.Println(i)
+		}
+	}
+}
 
+type userError struct {
+	name string
+	age int
+}
+
+func (e userError) Error() string {
+	return fmt.Sprintf("%v has a problem with their account", e.name)
+}
 
 func printNumericValue(num interface{}) {
 	switch v:= num.(type) {
@@ -164,4 +202,37 @@ func (ft fulltime) getSalary() int {
 
 func (ft fulltime) getName() string {
 	return ft.name
+}
+
+type User struct {
+	name string
+	age int
+}
+
+func getUser() (User, error) {
+	user:= User{name: "Akindele", age:23};
+	return user, nil;
+}
+
+func sendSMSToCouple(msgToCustomer, msgToSpouse string) (int, error) {
+	costForCustomer, error1 := sendSMS(msgToCustomer)
+	if error1 != nil {
+		return 0, error1
+	}
+
+	costForCustomerSpouse, error2 := sendSMS(msgToSpouse)
+	if error2 != nil {
+		return 0, error2
+	}
+
+	return costForCustomer + costForCustomerSpouse, nil;
+}
+
+func sendSMS(message string) (int, error) {
+	const maxTextLen = 25
+	const costPerChar = 2
+	if len(message) > maxTextLen {
+		return 0, fmt.Errorf("can't send texts over %v characters", maxTextLen)
+	}
+	return costPerChar * len(message), nil
 }
