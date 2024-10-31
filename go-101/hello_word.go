@@ -56,7 +56,25 @@ func main() {
 	// 	count++
 	// }
 
-	fizzBuzz(15)
+	// fizzBuzz(15)
+	mapPlay()
+}
+
+type Key struct {
+	providerName string
+	providerCode int
+}
+
+func mapPlay() {
+	areaCodes := make(map[string]string)
+	areaCodes["nigeria"] = "+234"
+	fmt.Println("Area code is, ", areaCodes)
+	nijaKey, ok := areaCodes["nigerhia"]
+	fmt.Println("okay status = ", ok)
+	fmt.Println("9ja key is = ", nijaKey)
+
+	key := Key{providerName: "Google", providerCode: 2}
+	fmt.Println("Struct is: ", key)
 }
 
 func fizzBuzz(n int) {
