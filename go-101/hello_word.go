@@ -5,7 +5,22 @@ import (
 )
 
 func main() {
+	var price int = 100
+	fmt.Println("Price is", price, "dollars.")
+
+	taxRate := 0.08
+	tax := taxRate * float64(price)
+	fmt.Println("Tax is", tax, "dollars.")
+
+	total := float64(price) + tax
+	fmt.Println("Total cost is", total, "dollars.")
+
+	availableFunds := float64(120)
+	fmt.Println(availableFunds, "available.")
+	fmt.Println("Within budget:", (total <= availableFunds))
+
 	// accountAge := 2.6
+	// fmt.Println("Account Age is", reflect.TypeOf(accountAge))
 	// accountAgeInt := int(accountAge)
 
 	// fmt.Println("Your account has existed for", accountAgeInt, "years")
@@ -30,7 +45,7 @@ func main() {
 	// fmt.Printf("%s is earning %.2f\n", (empType1.name), float64(empType1.getSalary()))
 	// fmt.Printf("%s is earning %.2f\n", (empType2.name), float64(empType2.getSalary()))
 	// fmt.Printf("%s is earning %.2f\n", (empType3.name), float64(empType3.getSalary()))
-	
+
 	// var i interface{} = "Hello, there!"
 	// emp, ok := i.(string)
 
@@ -57,7 +72,7 @@ func main() {
 	// }
 
 	// fizzBuzz(15)
-	mapPlay()
+	// mapPlay()
 }
 
 type Key struct {
@@ -78,14 +93,14 @@ func mapPlay() {
 }
 
 func fizzBuzz(n int) {
-	for i:= 1; i<=n; i++ {
+	for i := 1; i <= n; i++ {
 		if i%3 == 0 && i%5 == 0 {
 			fmt.Println("FizzBuzz")
 		} else if i%3 == 0 {
 			fmt.Println("Fizz")
 		} else if i%5 == 0 {
 			fmt.Println("Buzz")
-		} else{
+		} else {
 			fmt.Println(i)
 		}
 	}
@@ -93,7 +108,7 @@ func fizzBuzz(n int) {
 
 type userError struct {
 	name string
-	age int
+	age  int
 }
 
 func (e userError) Error() string {
@@ -101,13 +116,13 @@ func (e userError) Error() string {
 }
 
 func printNumericValue(num interface{}) {
-	switch v:= num.(type) {
+	switch v := num.(type) {
 	case int:
 		fmt.Printf("%T\n", v)
 	case float64:
 		fmt.Printf("%T\n", v)
 	default:
-		fmt.Printf("%T\n",v)
+		fmt.Printf("%T\n", v)
 	}
 }
 
@@ -224,12 +239,12 @@ func (ft fulltime) getName() string {
 
 type User struct {
 	name string
-	age int
+	age  int
 }
 
 func getUser() (User, error) {
-	user:= User{name: "Akindele", age:23};
-	return user, nil;
+	user := User{name: "Akindele", age: 23}
+	return user, nil
 }
 
 func sendSMSToCouple(msgToCustomer, msgToSpouse string) (int, error) {
@@ -243,7 +258,7 @@ func sendSMSToCouple(msgToCustomer, msgToSpouse string) (int, error) {
 		return 0, error2
 	}
 
-	return costForCustomer + costForCustomerSpouse, nil;
+	return costForCustomer + costForCustomerSpouse, nil
 }
 
 func sendSMS(message string) (int, error) {
