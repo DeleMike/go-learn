@@ -10,7 +10,7 @@ func main() {
 	replacer := strings.NewReplacer("#", "o")
 	fixed := replacer.Replace(broken)
 	fmt.Println(fixed)
-	
+
 	//now := time.Now()
 	//year := now.Year()
 	//fmt.Println(year)
