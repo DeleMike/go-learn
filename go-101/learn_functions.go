@@ -1,14 +1,27 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
 func main() {
-	fmt.Println(sayHi("Akindele"))
-	err := errors.New("this is an error")
-	fmt.Println(err.Error())
+	amount := 6
+
+	double(&amount)
+	fmt.Println(amount)
+}
+
+func printPointer(myBoolPointer *bool) {
+	fmt.Println(*myBoolPointer)
+}
+
+func createPointer() *float64 {
+	myFloat := 98.5
+	return &myFloat
+}
+
+func double(number *int) {
+	*number *= *number
 }
 
 func sayHi(name string) string {
