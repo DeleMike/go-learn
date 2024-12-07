@@ -2,22 +2,32 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func main() {
-	var price int = 100
-	fmt.Println("Price is", price, "dollars.")
+	broken := "G# R#ocks!"
+	replacer := strings.NewReplacer("#", "o")
+	fixed := replacer.Replace(broken)
+	fmt.Println(fixed)
+	
+	//now := time.Now()
+	//year := now.Year()
+	//fmt.Println(year)
 
-	taxRate := 0.08
-	tax := taxRate * float64(price)
-	fmt.Println("Tax is", tax, "dollars.")
-
-	total := float64(price) + tax
-	fmt.Println("Total cost is", total, "dollars.")
-
-	availableFunds := float64(120)
-	fmt.Println(availableFunds, "available.")
-	fmt.Println("Within budget:", (total <= availableFunds))
+	//var price int = 100
+	//fmt.Println("Price is", price, "dollars.")
+	//
+	//taxRate := 0.08
+	//tax := taxRate * float64(price)
+	//fmt.Println("Tax is", tax, "dollars.")
+	//
+	//total := float64(price) + tax
+	//fmt.Println("Total cost is", total, "dollars.")
+	//
+	//availableFunds := float64(120)
+	//fmt.Println(availableFunds, "available.")
+	//fmt.Println("Within budget:", (total <= availableFunds))
 
 	// accountAge := 2.6
 	// fmt.Println("Account Age is", reflect.TypeOf(accountAge))
