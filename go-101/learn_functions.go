@@ -5,10 +5,16 @@ import (
 )
 
 func main() {
-	amount := 6
+	truth := true
+	negate(&truth)
+	fmt.Println(truth)
+	lies := false
+	negate(&lies)
+	fmt.Println(lies)
+}
 
-	double(&amount)
-	fmt.Println(amount)
+func negate(myBoolean *bool) {
+	*myBoolean = !*myBoolean
 }
 
 func printPointer(myBoolPointer *bool) {
