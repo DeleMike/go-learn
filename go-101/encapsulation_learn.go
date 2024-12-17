@@ -7,19 +7,25 @@ import (
 )
 
 func main() {
-	date := calendar.Date{}
+	event := calendar.Event{}
 
-	err := date.SetYear(2010)
+	err := event.SetTitle("Parent's Anniversary")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = date.SetMonth(10)
+	err = event.SetYear(2010)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = date.SetDay(10)
+	err = event.SetMonth(10)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(date)
+	err = event.SetDay(10)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(event.Date)
+	fmt.Println(event.Title())
+
 }
