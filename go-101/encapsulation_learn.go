@@ -8,6 +8,7 @@ import (
 
 func main() {
 	date := calendar.Date{}
+
 	err := date.SetYear(2010)
 	if err != nil {
 		log.Fatal(err)
