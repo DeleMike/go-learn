@@ -1,41 +1,70 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
-	err := scanDirectory("/Users/mac/SWE/go-learn/my_directory")
-	if err != nil {
-		log.Fatal(err)
+	defer reportPanic()
+	scanDirectory("/Users/mac/SWE/go-learn/my_directory")
+
+	//one()
+	fmt.Println("Exiting normally")
+}
+func reportPanic() {
+	p := recover()
+	if p == nil {
+		return
+	}
+	err, ok := p.(error)
+	if ok {
+		fmt.Println(err)
 	}
 }
 
-func scanDirectory(path string) error {
+func one() {
+	defer fmt.Println("Run one")
+	two()
+}
+
+func two() {
+	defer fmt.Println("Run two")
+	three()
+}
+
+func three() {
+	defer calmDown()
+	panic("This call stack's too deep for me")
+}
+
+func calmDown() {
+	fmt.Println(recover())
+}
+
+func scanDirectory(path string) {
 	fmt.Println(path)
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	for _, file := range files {
 		filePath := filepath.Join(path, file.Name())
 		if file.IsDir() {
 			fmt.Println("Directory Name ", file.Name())
-			err = scanDirectory(filePath)
-			if err != nil {
-				return err
+			if strings.ToLower(file.Name()) == "energy" {
+				panic(errors.New("there is an error o")) // cause an error
 			}
+			scanDirectory(filePath)
 
 		} else {
 			fmt.Println("File Name ", file.Name())
 		}
 
 	}
-
-	return nil
 }
