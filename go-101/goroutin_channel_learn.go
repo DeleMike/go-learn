@@ -14,15 +14,21 @@ func main() {
 	//receivedVal := <-myChannel
 	//fmt.Println(receivedVal)
 
-	sizes := make(chan int)
+	sizes := make(chan Result)
+	urls := []string{
+		"https://www.example.com",
+		"https://www.flutter.dev",
+		"https://www.golang.org",
+	}
 
-	go responseSize("https://www.example.com", sizes)
-	go responseSize("https://www.flutter.dev", sizes)
-	go responseSize("https://www.golang.org", sizes)
+	for _, url := range urls {
+		go responseSize(url, sizes)
+	}
 
-	fmt.Println(<-sizes)
-	fmt.Println(<-sizes)
-	fmt.Println(<-sizes)
+	for i := 0; i < len(urls); i++ {
+		fmt.Println(<-sizes)
+
+	}
 
 	//time.Sleep(2 * time.Second)
 
@@ -100,7 +106,7 @@ func b() {
 
 }
 
-func responseSize(url string, channel chan int) {
+func responseSize(url string, channel chan Result) {
 	fmt.Println("Getting:", url)
 	response, err := http.Get(url)
 	if err != nil {
@@ -119,5 +125,14 @@ func responseSize(url string, channel chan int) {
 	}
 
 	//fmt.Println(len(body))
-	channel <- len(body)
+	result := Result{
+		url, len(body),
+	}
+	channel <- result
+
+}
+
+type Result struct {
+	name string
+	size int
 }
