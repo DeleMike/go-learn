@@ -1,1 +1,5 @@
-Hello, we are testing Go functions.
+20.25
+5.0
+10.5
+15.0
+hello
