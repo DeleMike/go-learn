@@ -99,6 +99,11 @@ func createBook(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newBook)
 }
 
+func getName(c *gin.Context) {
+	name := c.Params.ByName("name")
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "hello " + name})
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/books", getBooks)
@@ -106,6 +111,7 @@ func main() {
 	router.GET("/books/:id", bookById)
 	router.PATCH("/checkout", checkoutBook)
 	router.PATCH("/return", returnBook)
+	router.GET("/name/:name", getName)
 
 	err := router.Run("localhost:8080")
 	if err != nil {
