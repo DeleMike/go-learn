@@ -9,3 +9,10 @@ func main() {
 		return
 	}
 }
+
+type Recipe struct {
+	Name        string   `json:"name"`
+	Tags        []string `json:"tags"`
+	Ingredients []string `json:"ingredients"`
+	PublishedAt string   `json:"published_at"`
+}
