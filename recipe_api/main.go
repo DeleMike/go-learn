@@ -16,8 +16,9 @@ func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
 	router.GET("/recipes", ListRecipesHandler)
-	router.PUT("/recipe/:id", UpdateRecipeHandler)
-	router.PATCH("/recipe/:id", UpdateRecipeByPatchHandler)
+	router.PUT("/recipes/:id", UpdateRecipeHandler)
+	router.PATCH("/recipes/:id", UpdateRecipeByPatchHandler)
+	router.DELETE("/recipes/:id", DeleteRecipeHandler)
 	err := router.Run(":8080")
 	if err != nil {
 		return
@@ -123,4 +124,24 @@ func updateRecipe(recipe Recipe, foundRecipe *Recipe) {
 	if recipe.PublishedAt != "" {
 		foundRecipe.PublishedAt = time.Now().Format(time.RFC3339)
 	}
+}
+
+func DeleteRecipeHandler(c *gin.Context) {
+	id := c.Param("id")
+	index := -1
+	for i := 0; i < len(recipes); i++ {
+		if recipes[i].ID == id {
+			index = i
+		}
+	}
+
+	if index == -1 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "recipe not found"})
+		return
+	}
+
+	recipes = append(recipes[:index], recipes[index+1:]...)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Recipe deleted successfully",
+	})
 }
