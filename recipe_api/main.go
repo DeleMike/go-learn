@@ -6,6 +6,7 @@ import (
 	"github.com/rs/xid"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,7 @@ func main() {
 	router.PUT("/recipes/:id", UpdateRecipeHandler)
 	router.PATCH("/recipes/:id", UpdateRecipeByPatchHandler)
 	router.DELETE("/recipes/:id", DeleteRecipeHandler)
+	router.GET("recipes/search", SearchRecipeHandler)
 	err := router.Run(":8080")
 	if err != nil {
 		return
@@ -144,4 +146,26 @@ func DeleteRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Recipe deleted successfully",
 	})
+}
+
+func SearchRecipeHandler(c *gin.Context) {
+	tag := c.Query("tag")
+	listOfRecipes := make([]Recipe, 0)
+
+	// very bad search...LOL. We can do better...
+	for i := 0; i < len(recipes); i++ {
+		found := false
+		for _, t := range recipes[i].Tags {
+			if strings.ToLower(t) == strings.ToLower(tag) {
+				found = true
+			}
+		}
+
+		if found {
+			listOfRecipes = append(listOfRecipes, recipes[i])
+
+		}
+	}
+
+	c.JSON(http.StatusOK, listOfRecipes)
 }
