@@ -130,11 +130,19 @@ func NewRecipeHandler(c *gin.Context) {
 // '200':
 // description: Successful operation
 func ListRecipesHandler(c *gin.Context) {
+	recipes, err = loadAllRecipes(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, recipes)
+}
+
+func loadAllRecipes(c *gin.Context) ([]Recipe, error) {
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return []Recipe{}, errors.New(err.Error())
 	}
 
 	defer func(cur *mongo.Cursor, ctx context.Context) {
@@ -149,12 +157,13 @@ func ListRecipesHandler(c *gin.Context) {
 			slog.Error(err.Error())
 
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return []Recipe{}, errors.New(err.Error())
 		}
 
 		recipes = append(recipes, recipe)
 	}
-	c.JSON(http.StatusOK, recipes)
+
+	return recipes, nil
 }
 
 func GetRecipeByIDHandler(c *gin.Context) {
@@ -313,7 +322,10 @@ func DeleteRecipeHandler(c *gin.Context) {
 func SearchRecipeHandler(c *gin.Context) {
 	tag := c.Query("tag")
 	listOfRecipes := make([]Recipe, 0)
-
+	recipes, err = loadAllRecipes(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 	// very bad search...LOL. We can do better...
 	for i := 0; i < len(recipes); i++ {
 		found := false
