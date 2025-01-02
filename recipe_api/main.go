@@ -1,3 +1,21 @@
+//	Recipes API
+//
+//	This is a sample recipes API. You can find out more about the API at https://github.com/DeleMike/go-learn/recipe_api/
+//
+//		Schemes: http
+// 		Host: localhost:8080
+// 		BasePath: /
+// 		Version: 1.0.0
+//		Contact: Akindele Michael
+//		<akindelemichael65@gmail.com> https://akindelemichael-1.web.app/
+//
+//		Consumes:
+//		- application/json
+//
+//		Produces:
+//		- application/json
+// swagger:meta
+
 package main
 
 import (
@@ -56,6 +74,14 @@ func NewRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, recipe)
 }
 
+// swagger:operation GET /recipes recipes listRecipes
+// Returns list of recipes
+// ---
+// produces:
+// - application/json
+// responses:
+// '200':
+// description: Successful operation
 func ListRecipesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, recipes)
 }
@@ -84,6 +110,26 @@ func UpdateRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, recipe)
 }
 
+// swagger:operation PUT /recipes/{id} recipes updateRecipe
+// Update an existing recipe
+// ---
+// parameters:
+//   - name: id
+//     in: path
+//     description: ID of the recipe
+//     required: true
+//     type: string
+//
+// produces:
+// - application/json
+// responses:
+//
+//	'200':
+//	  description: Successful operation
+//	'400':
+//	  description: Invalid input
+//	'404':
+//	  description: Invalid recipe ID
 func UpdateRecipeByPatchHandler(c *gin.Context) {
 	id := c.Param("id")
 	var recipe Recipe

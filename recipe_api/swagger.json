@@ -1,0 +1,50 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/recipes": {
+      "get": {
+        "description": "Successful operation",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "listRecipes"
+      }
+    },
+    "/recipes/{id}": {
+      "put": {
+        "description": "Update an existing recipe",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "updateRecipe",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "ID of the recipe",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Invalid recipe ID"
+          }
+        }
+      }
+    }
+  }
+}
