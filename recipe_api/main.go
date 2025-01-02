@@ -232,16 +232,27 @@ func UpdateRecipeHandler(c *gin.Context) {
 //	  description: Invalid recipe ID
 func UpdateRecipeByPatchHandler(c *gin.Context) {
 	id := c.Param("id")
-	var recipe Recipe
-	if err := c.ShouldBindJSON(&recipe); err != nil {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		slog.Error("Invalid ID format:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid recipe ID"})
+		return
+	}
+
+	var recipeFromPayload Recipe
+	if err := c.ShouldBindJSON(&recipeFromPayload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	objectID, _ := primitive.ObjectIDFromHex(id)
-	//updateRecipe(recipe)
+	var recipe Recipe
+	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&recipe)
+
+	updateRecipe(recipeFromPayload, &recipe)
+
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": objectID}, bson.D{
 		{"$set", bson.D{
+
 			{"name", recipe.Name},
 			{"instructions", recipe.Instructions},
 			{"ingredients", recipe.Ingredients},
@@ -260,18 +271,18 @@ func UpdateRecipeByPatchHandler(c *gin.Context) {
 	})
 }
 
-func updateRecipe(recipe Recipe, foundRecipe *Recipe) {
-	if recipe.Name != "" {
-		foundRecipe.Name = recipe.Name
+func updateRecipe(recipeFromPayload Recipe, recipeToUpdate *Recipe) {
+	if recipeFromPayload.Name != "" {
+		recipeToUpdate.Name = recipeFromPayload.Name
 	}
-	if recipe.Tags != nil {
-		foundRecipe.Tags = recipe.Tags
+	if recipeFromPayload.Tags != nil {
+		recipeToUpdate.Tags = recipeFromPayload.Tags
 	}
-	if recipe.Ingredients != nil {
-		foundRecipe.Ingredients = recipe.Ingredients
+	if recipeFromPayload.Ingredients != nil {
+		recipeToUpdate.Ingredients = recipeFromPayload.Ingredients
 	}
-	if recipe.Instructions != nil {
-		foundRecipe.Instructions = recipe.Instructions
+	if recipeFromPayload.Instructions != nil {
+		recipeToUpdate.Instructions = recipeFromPayload.Instructions
 	}
 	//if recipe.PublishedAt != "" {
 	//	foundRecipe.PublishedAt = time.Now().Format(time.RFC3339)
