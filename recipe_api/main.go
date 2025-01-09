@@ -20,8 +20,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/delemike/recipe_api/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -70,7 +72,17 @@ func Init() {
 	}
 
 	log.Println("Connected to MongoDB")
+
+	// initialise cache via Redis
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_URL"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
+	})
+	status := redisClient.Ping()
+	fmt.Println(status)
+
 	collection := client.Database(os.Getenv("MONGO_DATABASE")).Collection("recipes")
-	recipesHandler = handlers.NewRecipesHandler(ctx, collection)
+	recipesHandler = handlers.NewRecipesHandler(ctx, collection, redisClient)
 
 }

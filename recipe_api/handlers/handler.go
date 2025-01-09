@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/delemike/recipe_api/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/net/context"
+	"log"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -15,15 +18,21 @@ import (
 )
 
 type RecipesHandler struct {
-	collection *mongo.Collection
-	ctx        context.Context
+	collection  *mongo.Collection
+	ctx         context.Context
+	redisClient *redis.Client
 }
 
 // NewRecipesHandler Initialise the key resources
-func NewRecipesHandler(ctx context.Context, collection *mongo.Collection) *RecipesHandler {
+func NewRecipesHandler(
+	ctx context.Context,
+	collection *mongo.Collection,
+	redisClient *redis.Client,
+) *RecipesHandler {
 	return &RecipesHandler{
-		collection: collection,
-		ctx:        ctx,
+		collection:  collection,
+		ctx:         ctx,
+		redisClient: redisClient,
 	}
 }
 
@@ -194,29 +203,46 @@ func (handler *RecipesHandler) SearchRecipeHandler(c *gin.Context) {
 }
 
 func loadAllRecipes(c *gin.Context, handler *RecipesHandler) ([]models.Recipe, error) {
-	cur, err := handler.collection.Find(c, bson.D{})
-	if err != nil {
-
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return []models.Recipe{}, errors.New(err.Error())
-	}
-
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		_ = cur.Close(ctx)
-	}(cur, c)
-
-	recipes := make([]models.Recipe, 0)
-	for cur.Next(c) {
-		var recipe models.Recipe
-		err := cur.Decode(&recipe)
+	val, err := handler.redisClient.Get("recipes").Result()
+	var recipes []models.Recipe
+	if errors.Is(err, redis.Nil) {
+		log.Printf("Request to MongoDB")
+		cur, err := handler.collection.Find(c, bson.D{})
 		if err != nil {
-			slog.Error(err.Error())
-
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return []models.Recipe{}, errors.New(err.Error())
 		}
 
-		recipes = append(recipes, recipe)
+		defer func(cur *mongo.Cursor, ctx context.Context) {
+			_ = cur.Close(ctx)
+		}(cur, c)
+
+		recipes = make([]models.Recipe, 0)
+		for cur.Next(c) {
+			var recipe models.Recipe
+			err := cur.Decode(&recipe)
+			if err != nil {
+				slog.Error(err.Error())
+
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return []models.Recipe{}, errors.New(err.Error())
+			}
+
+			recipes = append(recipes, recipe)
+
+		}
+		data, _ := json.Marshal(recipes)
+		handler.redisClient.Set("recipes", string(data), 0)
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return []models.Recipe{}, errors.New(err.Error())
+	} else {
+		log.Printf("Request to Redis")
+		recipes = make([]models.Recipe, 0)
+		err = json.Unmarshal([]byte(val), &recipes)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return recipes, nil
