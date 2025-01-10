@@ -51,6 +51,8 @@ func (handler *RecipesHandler) NewRecipeHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error() + "\nError while inserting a new recipe"})
 		return
 	}
+	log.Println("Remove data from Redis")
+	handler.redisClient.Del("recipes")
 	c.JSON(http.StatusOK, recipe)
 }
 
@@ -72,18 +74,41 @@ func (handler *RecipesHandler) GetRecipeByIDHandler(c *gin.Context) {
 		return
 	}
 	var recipe models.Recipe
-	err = handler.collection.FindOne(c, bson.M{"_id": objectID}).Decode(&recipe)
-	if err != nil {
-		if errors.Is(mongo.ErrNoDocuments, err) {
-			// Handle case where no document is found
-			slog.Warn("Recipe not found with ID:", id)
-			c.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
-		} else {
-			// Handle other potential errors
-			slog.Error("Error fetching recipe:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching recipe"})
+
+	val, err := handler.redisClient.Get("recipes").Result()
+	if errors.Is(err, redis.Nil) {
+		log.Printf("Request to Mongo")
+
+		err = handler.collection.FindOne(c, bson.M{"_id": objectID}).Decode(&recipe)
+		if err != nil {
+
+			if errors.Is(mongo.ErrNoDocuments, err) {
+				// Handle case where no document is found
+				slog.Warn("Recipe not found with ID:", id)
+				c.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+			} else {
+				// Handle other potential errors
+				slog.Error("Error fetching recipe:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching recipe"})
+			}
+			return
 		}
-		return
+	} else {
+		log.Printf("Request to Redis")
+		var recipes []models.Recipe
+		err = json.Unmarshal([]byte(val), &recipes)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not load all recipes"})
+		}
+
+		for _, recipe := range recipes {
+			if recipe.ID == objectID {
+				c.JSON(http.StatusOK, gin.H{"message": "Recipe found", "recipe": recipe})
+				return
+			}
+		}
+
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Recipe found", "recipe": recipe})
@@ -112,6 +137,8 @@ func (handler *RecipesHandler) UpdateRecipeHandler(c *gin.Context) {
 		return
 	}
 
+	log.Println("Remove data from Redis")
+	handler.redisClient.Del("recipes")
 	c.JSON(http.StatusOK, gin.H{"message": "Recipe has been updated", "recipe": recipe})
 }
 
@@ -150,6 +177,8 @@ func (handler *RecipesHandler) UpdateRecipeByPatchHandler(c *gin.Context) {
 		return
 	}
 
+	log.Println("Remove data from Redis")
+	handler.redisClient.Del("recipes")
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Recipe updated successfully",
 		"recipe":  recipe,
@@ -171,6 +200,8 @@ func (handler *RecipesHandler) DeleteRecipeHandler(c *gin.Context) {
 		return
 	}
 
+	log.Println("Remove data from Redis")
+	handler.redisClient.Del("recipes")
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Recipe deleted successfully",
 	})
