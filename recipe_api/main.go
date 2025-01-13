@@ -36,13 +36,20 @@ var recipesHandler *handlers.RecipesHandler
 func main() {
 	Init()
 	router := gin.Default()
-	router.POST("/recipes", recipesHandler.NewRecipeHandler)
+
 	router.GET("/recipes", recipesHandler.ListRecipesHandler)
-	router.GET("/recipes/:id", recipesHandler.GetRecipeByIDHandler)
-	router.PUT("/recipes/:id", recipesHandler.UpdateRecipeHandler)
-	router.PATCH("/recipes/:id", recipesHandler.UpdateRecipeByPatchHandler)
-	router.DELETE("/recipes/:id", recipesHandler.DeleteRecipeHandler)
 	router.GET("recipes/search", recipesHandler.SearchRecipeHandler)
+
+	authorized := router.Group("/")
+	authorized.Use(handlers.AuthMiddleware())
+	{
+		authorized.POST("/recipes", recipesHandler.NewRecipeHandler)
+		authorized.GET("/recipes/:id", recipesHandler.GetRecipeByIDHandler)
+		authorized.PUT("/recipes/:id", recipesHandler.UpdateRecipeHandler)
+		authorized.PATCH("/recipes/:id", recipesHandler.UpdateRecipeByPatchHandler)
+		authorized.DELETE("/recipes/:id", recipesHandler.DeleteRecipeHandler)
+	}
+
 	err := router.Run(":8080")
 	if err != nil {
 		return

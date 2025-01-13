@@ -13,6 +13,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -36,7 +37,21 @@ func NewRecipesHandler(
 	}
 }
 
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.GetHeader("X-API-KEY") != os.Getenv("X_API_KEY") {
+			c.AbortWithStatus(http.StatusUnauthorized)
+		}
+		c.Next()
+	}
+}
+
 func (handler *RecipesHandler) NewRecipeHandler(c *gin.Context) {
+	if c.GetHeader("X-API-KEY") != os.Getenv("X_API_KEY") {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "API key not provided or invalid"})
+		return
+	}
 
 	var recipe models.Recipe
 	if err := c.ShouldBindJSON(&recipe); err != nil {
