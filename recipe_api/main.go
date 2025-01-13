@@ -31,15 +31,21 @@ import (
 	"os"
 )
 
+var authHandler *handlers.AuthHandler
 var recipesHandler *handlers.RecipesHandler
 
 func main() {
 	Init()
 	router := gin.Default()
 
+	// public routes
 	router.GET("/recipes", recipesHandler.ListRecipesHandler)
 	router.GET("recipes/search", recipesHandler.SearchRecipeHandler)
 
+	// auth routes
+	router.POST("/signin", authHandler.SignInHandler)
+
+	// using middleware
 	authorized := router.Group("/")
 	authorized.Use(handlers.AuthMiddleware())
 	{
@@ -91,5 +97,6 @@ func Init() {
 
 	collection := client.Database(os.Getenv("MONGO_DATABASE")).Collection("recipes")
 	recipesHandler = handlers.NewRecipesHandler(ctx, collection, redisClient)
+	authHandler = &handlers.AuthHandler{}
 
 }
