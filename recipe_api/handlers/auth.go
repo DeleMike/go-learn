@@ -10,7 +10,17 @@ import (
 	"time"
 )
 
-type AuthHandler struct{}
+type AuthHandler struct {
+	collection *mongo.Collection
+	ctx        context.Context
+}
+
+func NewAuthHandler(ctx context.Context, collection *mongo.Collection) *AuthHandler {
+	return &AuthHandler{
+		collection: collection,
+		ctx:        ctx,
+	}
+}
 
 type Claims struct {
 	Username string `json:"username"`
