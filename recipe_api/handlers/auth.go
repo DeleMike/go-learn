@@ -1,10 +1,15 @@
 package handlers
 
 import (
+	"crypto/sha256"
 	"errors"
 	"github.com/delemike/recipe_api/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/net/context"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -33,6 +38,7 @@ type JWTOutput struct {
 }
 
 func (handler *AuthHandler) SignInHandler(c *gin.Context) {
+
 	var user models.User
 	// parsing user --> deserialization
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -40,8 +46,14 @@ func (handler *AuthHandler) SignInHandler(c *gin.Context) {
 		return
 	}
 
-	if user.Username != "admin" || user.Password != "password" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+	h := sha256.New()
+	cur := handler.collection.FindOne(handler.ctx, bson.M{
+		"username": user.Username,
+		"password": string(h.Sum([]byte(user.Password))),
+	})
+
+	if cur.Err() != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username or password"})
 		return
 	}
 
@@ -114,4 +126,43 @@ func (handler *AuthHandler) RefreshHandler(c *gin.Context) {
 		Expires: expirationTime,
 	}
 	c.JSON(http.StatusOK, jwtOutput)
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenValue := c.GetHeader("Authorization")
+		if tokenValue == "" {
+			slog.Error("Missing Authorization header")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		claims := &Claims{}
+
+		tkn, err := jwt.ParseWithClaims(tokenValue, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+
+		// Check for errors or nil token
+		if err != nil || tkn == nil {
+			if err != nil {
+				slog.Error("Token parsing error: " + err.Error())
+			} else {
+				slog.Error("Token is nil")
+			}
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Check token validity
+		if !tkn.Valid {
+			slog.Error("Invalid token")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Token is valid, proceed to the next middleware/handler
+		c.Next()
+
+		c.Next()
+	}
 }
