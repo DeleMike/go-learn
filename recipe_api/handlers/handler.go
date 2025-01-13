@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/delemike/recipe_api/models"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/bson"
