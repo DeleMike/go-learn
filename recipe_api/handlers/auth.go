@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"github.com/delemike/recipe_api/models"
 	"github.com/dgrijalva/jwt-go"
@@ -46,10 +47,13 @@ func (handler *AuthHandler) SignInHandler(c *gin.Context) {
 		return
 	}
 
+	// Hash the password
 	h := sha256.New()
+	h.Write([]byte(user.Password))                 // Hash the user's input password
+	passwordHash := hex.EncodeToString(h.Sum(nil)) // Convert the hash to a hex string
 	cur := handler.collection.FindOne(handler.ctx, bson.M{
 		"username": user.Username,
-		"password": string(h.Sum([]byte(user.Password))),
+		"password": passwordHash,
 	})
 
 	if cur.Err() != nil {
