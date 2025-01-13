@@ -209,7 +209,11 @@ func (handler *RecipesHandler) DeleteRecipeHandler(c *gin.Context) {
 	}
 
 	// Perform the deletion
-	_, err = handler.collection.DeleteOne(c, bson.M{"_id": id})
+	result, err := handler.collection.DeleteOne(c, bson.M{"_id": id})
+	if result.DeletedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+	}
+	slog.Info("Remove data from Mongo")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
