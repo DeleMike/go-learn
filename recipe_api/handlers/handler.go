@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/delemike/recipe_api/models"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,9 +40,39 @@ func NewRecipesHandler(
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader("X-API-KEY") != os.Getenv("X_API_KEY") {
+		tokenValue := c.GetHeader("Authorization")
+		if tokenValue == "" {
+			slog.Error("Missing Authorization header")
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
+		claims := &Claims{}
+
+		tkn, err := jwt.ParseWithClaims(tokenValue, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+
+		// Check for errors or nil token
+		if err != nil || tkn == nil {
+			if err != nil {
+				slog.Error("Token parsing error: " + err.Error())
+			} else {
+				slog.Error("Token is nil")
+			}
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Check token validity
+		if !tkn.Valid {
+			slog.Error("Invalid token")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Token is valid, proceed to the next middleware/handler
+		c.Next()
+
 		c.Next()
 	}
 }
@@ -219,7 +250,7 @@ func (handler *RecipesHandler) DeleteRecipeHandler(c *gin.Context) {
 		return
 	}
 
-	log.Println("Remove data from Redis")
+	slog.Info("Remove all data from Redis")
 	handler.redisClient.Del("recipes")
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Recipe deleted successfully",
