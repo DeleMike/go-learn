@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/delemike/recipe_api/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,54 @@ func (handler *AuthHandler) SignInHandler(c *gin.Context) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	jwtOutput := JWTOutput{
+		Token:   tokenString,
+		Expires: expirationTime,
+	}
+	c.JSON(http.StatusOK, jwtOutput)
+}
+
+func (handler *AuthHandler) RefreshHandler(c *gin.Context) {
+	tokenValue := c.GetHeader("Authorization")
+	claims := &Claims{}
+
+	// Parse the token
+	token, err := jwt.ParseWithClaims(tokenValue, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+
+	// Specifically check for token expiration
+	if err != nil {
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				// Token is expired, which is fine - we'll continue with refresh
+			} else {
+				// Some other validation error but NOT expiration like wrong signature, malformed token, etc.)
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+				return
+			}
+		}
+	}
+	// If token is not expired, check if it's close to expiration
+	if token != nil && token.Valid {
+		timeUntilExpiry := time.Unix(claims.ExpiresAt, 0).Sub(time.Now())
+		if timeUntilExpiry > 30*time.Second {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Token is not expired yet"})
+			return
+		}
+	}
+
+	// Generate new token
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims.ExpiresAt = expirationTime.Unix()
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := newToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
