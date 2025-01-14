@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/delemike/recipe_api/handlers"
+	"github.com/gin-contrib/sessions"
+	redisStore "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,15 +37,17 @@ var authHandler *handlers.AuthHandler
 var recipesHandler *handlers.RecipesHandler
 
 func main() {
-	Init()
 	router := gin.Default()
 
+	store, _ := redisStore.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
+	router.Use(sessions.Sessions("session", store))
 	// public routes
 	router.GET("/recipes", recipesHandler.ListRecipesHandler)
 	router.GET("recipes/search", recipesHandler.SearchRecipeHandler)
 
 	// auth routes
 	router.POST("/signin", authHandler.SignInHandler)
+	router.POST("/signout", authHandler.SignOutHandler)
 	router.POST("/refresh", authHandler.RefreshHandler)
 
 	// using middleware
@@ -63,7 +67,7 @@ func main() {
 	}
 }
 
-func Init() {
+func init() {
 	// Initialize context
 	ctx := context.Background()
 	// Get MongoDB URI from environment variable
