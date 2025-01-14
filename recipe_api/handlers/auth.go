@@ -137,7 +137,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenValue := c.GetHeader("Authorization")
 		if tokenValue == "" {
 			slog.Error("Missing Authorization header")
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
 			return
 		}
 		claims := &Claims{}
@@ -153,20 +153,19 @@ func AuthMiddleware() gin.HandlerFunc {
 			} else {
 				slog.Error("Token is nil")
 			}
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or missing token"})
 			return
 		}
 
 		// Check token validity
 		if !tkn.Valid {
 			slog.Error("Invalid token")
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
 		// Token is valid, proceed to the next middleware/handler
 		c.Next()
 
-		c.Next()
 	}
 }
