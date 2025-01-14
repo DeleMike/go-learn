@@ -42,6 +42,16 @@ type JWTOutput struct {
 	Expires time.Time `json:"expires"`
 }
 
+// swagger:operation POST /signin auth signIn
+// Login with username and password
+// ---
+// produces:
+// - application/json
+// responses:
+// '200':
+// description: Successful operation
+// '401':
+// description: Invalid credentials
 func (handler *AuthHandler) SignInHandler(c *gin.Context) {
 
 	var user models.User
@@ -111,6 +121,19 @@ func (handler *AuthHandler) SignOutHandler(c *gin.Context) {
 
 }
 
+// swagger:operation POST /refresh auth refresh
+// Get new token in exchange for an old one
+// ---
+// produces:
+// - application/json
+// responses:
+// '200':
+// description: Successful operation
+// '400':
+// description: Token is new and doesn't need
+// a refresh
+// '401':
+// description: Invalid credentials
 func (handler *AuthHandler) RefreshCookie(c *gin.Context) {
 	session := sessions.Default(c)
 	sessionToken := session.Get("token")

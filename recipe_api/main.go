@@ -9,6 +9,11 @@
 //		Contact: Akindele Michael
 //		<akindelemichael65@gmail.com> https://akindelemichael-1.web.app/
 //
+//		SecurityDefinitions:
+//		api_key:
+//			type: apiKey
+//			name: Authorization
+//			in: header
 //		Consumes:
 //		- application/json
 //
@@ -62,10 +67,12 @@ func main() {
 		authorized.DELETE("/recipes/:id", recipesHandler.DeleteRecipeHandler)
 	}
 
-	err := router.Run(":8080")
+	//err := router.Run(":8080")
+	err := router.RunTLS(":443", "/Users/mac/SWE/go-learn/certs/localhost.crt", "/Users/mac/SWE/go-learn/certs/localhost.key")
 	if err != nil {
 		return
 	}
+
 }
 
 func init() {
