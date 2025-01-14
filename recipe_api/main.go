@@ -48,7 +48,8 @@ func main() {
 	// auth routes
 	router.POST("/signin", authHandler.SignInHandler)
 	router.POST("/signout", authHandler.SignOutHandler)
-	router.POST("/refresh", authHandler.RefreshHandler)
+	//router.POST("/refresh", authHandler.RefreshHandler)
+	router.POST("refresh", authHandler.RefreshCookie)
 
 	// using middleware
 	authorized := router.Group("/")

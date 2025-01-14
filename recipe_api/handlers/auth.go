@@ -108,6 +108,28 @@ func (handler *AuthHandler) SignOutHandler(c *gin.Context) {
 
 }
 
+func (handler *AuthHandler) RefreshCookie(c *gin.Context) {
+	session := sessions.Default(c)
+	sessionToken := session.Get("token")
+	sessionUser := session.Get("username")
+	if sessionToken == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid session cookie"})
+	}
+
+	// generate session token - will
+	sessionToken = xid.New().String()
+	session = sessions.Default(c)
+	session.Set("username", sessionUser.(string))
+	session.Set("token", sessionToken)
+	err := session.Save()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save session token:" + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "New session cookie issued"})
+
+}
+
 func (handler *AuthHandler) RefreshHandler(c *gin.Context) {
 	tokenValue := c.GetHeader("Authorization")
 	claims := &Claims{}
