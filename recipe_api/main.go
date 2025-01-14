@@ -26,6 +26,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/delemike/recipe_api/handlers"
 	"github.com/gin-contrib/sessions"
 	redisStore "github.com/gin-contrib/sessions/redis"
@@ -34,12 +37,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
-	"os"
 )
 
 var authHandler *handlers.AuthHandler
 var recipesHandler *handlers.RecipesHandler
+var profileHandler *handlers.ProfileHandler
 
 func main() {
 	router := gin.Default()
@@ -65,10 +67,13 @@ func main() {
 		authorized.PUT("/recipes/:id", recipesHandler.UpdateRecipeHandler)
 		authorized.PATCH("/recipes/:id", recipesHandler.UpdateRecipeByPatchHandler)
 		authorized.DELETE("/recipes/:id", recipesHandler.DeleteRecipeHandler)
+
+		authorized.GET("/user/:id", profileHandler.GetUserProfile)
+
 	}
 
-	//err := router.Run(":8080")
-	err := router.RunTLS(":443", "/Users/mac/SWE/go-learn/certs/localhost.crt", "/Users/mac/SWE/go-learn/certs/localhost.key")
+	err := router.Run(":8080")
+	//err := router.RunTLS(":443", "/Users/mac/SWE/go-learn/certs/localhost.crt", "/Users/mac/SWE/go-learn/certs/localhost.key")
 	if err != nil {
 		return
 	}
@@ -112,5 +117,6 @@ func init() {
 	recipesHandler = handlers.NewRecipesHandler(ctx, collection, redisClient)
 	collectionUsers := client.Database(os.Getenv("MONGO_DATABASE")).Collection("users")
 	authHandler = handlers.NewAuthHandler(ctx, collectionUsers)
+	profileHandler = handlers.NewProfileHandler(ctx, collectionUsers)
 
 }
