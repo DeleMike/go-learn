@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/auth0-community/go-auth0"
 	"github.com/delemike/recipe_api/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
@@ -12,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/net/context"
+	"gopkg.in/square/go-jose.v2"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -180,6 +183,23 @@ func (handler *AuthHandler) RefreshHandler(c *gin.Context) {
 
 func AuthMiddleware() gin.HandlerFunc {
 
+	return func(c *gin.Context) {
+		var auth0Domain = os.Getenv("AUTH0_DOMAIN")
+		client := auth0.NewJWKClient(auth0.JWKClientOptions{URI: auth0Domain + ".well-known/jwks.json"}, nil)
+		configuration := auth0.NewConfiguration(client, []string{os.Getenv("AUTH0_API_IDENTIFIER")}, auth0Domain, jose.RS256)
+		validator := auth0.NewValidator(configuration, nil)
+		_, err := validator.ValidateRequest(c.Request)
+		//session := sessions.Default(c)
+		//sessionToken := session.Get("token")
+		if err != nil {
+			log.Println("Error is = " + err.Error())
+			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid token"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+
 	//return func(c *gin.Context) {
 	//	tokenValue := c.GetHeader("Authorization")
 	//	if tokenValue == "" {
@@ -215,14 +235,5 @@ func AuthMiddleware() gin.HandlerFunc {
 	//	c.Next()
 	//
 	//}
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		sessionToken := session.Get("token")
-		if sessionToken == nil {
-			c.JSON(http.StatusForbidden, gin.H{"message": "not logged in"})
-			c.Abort()
-		}
-		c.Next()
-	}
 
 }
