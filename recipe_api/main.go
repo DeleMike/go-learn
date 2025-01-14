@@ -68,6 +68,7 @@ func main() {
 		authorized.PATCH("/recipes/:id", recipesHandler.UpdateRecipeByPatchHandler)
 		authorized.DELETE("/recipes/:id", recipesHandler.DeleteRecipeHandler)
 
+		authorized.POST("/user", profileHandler.CreateUserProfile)
 		authorized.GET("/user/:id", profileHandler.GetUserProfile)
 
 	}

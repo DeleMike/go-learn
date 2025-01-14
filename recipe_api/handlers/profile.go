@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"github.com/delemike/recipe_api/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"log/slog"
 	"net/http"
 )
@@ -22,6 +25,27 @@ func NewProfileHandler(ctx context.Context, collection *mongo.Collection) *Profi
 		collection: collection,
 		ctx:        ctx,
 	}
+}
+
+func (handler *ProfileHandler) CreateUserProfile(c *gin.Context) {
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	h := sha256.New()
+	h.Write([]byte(user.Password))
+	passwordHash := hex.EncodeToString(h.Sum(nil))
+	user.Password = passwordHash
+
+	log.Printf("Attempting to insert user: %+v", user)
+	_, err := handler.collection.InsertOne(handler.ctx, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error() + "\nError while creating a new user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "username": user.Username})
 }
 
 func (handler *ProfileHandler) GetUserProfile(c *gin.Context) {
