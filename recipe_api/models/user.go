@@ -5,7 +5,7 @@ package models
 //
 // swagger:model user
 type User struct {
-	// User's password
+	// User's password.
 	//
 	// required: true
 	Username string `json:"username"`

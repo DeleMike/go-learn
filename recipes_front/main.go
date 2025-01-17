@@ -43,7 +43,7 @@ func init() {
 		recipess = append(recipess, recipe)
 	}
 
-	// reset recipes to have the contents of recipess
+	// reset recipes to have the contents of recipesss
 	recipes = recipess
 }
 
